@@ -1,10 +1,16 @@
+import os
 import sys
 
+side_length = None
+
 class BoggleSolver:
-    def __init__(self, letter_list):
-        self.dictionary = Dictionary("C:\\My Dropbox\\Programming Projects\\Python\\PyBoggle\\dictionary.txt")
+    def __init__(self, letter_list, min_word_length):
         self.board = Board(letter_list)
-        self.min_length = 3
+        global side_length
+        side_length = self.board.side_length
+
+        self.dictionary = Dictionary('dictionary.txt')
+        self.min_length = int(min_word_length)
         self.found_words = set()
 
         # Find all words starting from each coordinate position
@@ -14,16 +20,15 @@ class BoggleSolver:
 
     def _find_words(self, word, row, column):
         word.add_letter(self.board[row][column], row, column)
-
         if (self._can_add_word(word)):
-            self.found_words.add(word.letter_sequence)
+            self.found_words.add(word)
 
         for row, column in self._get_valid_coodinates_for_word(word, row, column):
-            if(self.dictionary.contains_prefix(word.letter_sequence + self.board[row][column])):
+            if(self.dictionary.contains_prefix(word.letters + self.board[row][column])):
                 self._find_words(Word.new_from_word(word), row, column)
 
     def _can_add_word(self, word):
-        return len(word) >= self.min_length and self.dictionary.contains_word(word.letter_sequence)
+        return len(word) >= self.min_length and self.dictionary.contains_word(word.letters)
 
     def _get_valid_coodinates_for_word(self, word, row, column):
         for r in range(row - 1, row + 2):
@@ -54,7 +59,7 @@ class Board:
 
 class Word:
     def __init__(self):
-        self.letter_sequence = ""
+        self.letters = ""
         self.used_board_coordinates = set()
 
     @classmethod
@@ -66,19 +71,38 @@ class Word:
     @classmethod
     def new_from_word(cls, word):
         new_word = cls()
-        new_word.letter_sequence += word.letter_sequence
+        new_word.letters += word.letters
         new_word.used_board_coordinates.update(word.used_board_coordinates)
         return new_word
 
     def add_letter(self, letter, row, column):
-        self.letter_sequence += letter
+        self.letters += letter
         self.used_board_coordinates.add((row, column))
 
-    def __str__(self):
-        return self.letter_sequence
+    def get_used_coord_numbers(self):
+        return map(lambda (x, y) : str(side_length * x + y), [coordinate for coordinate in self.used_board_coordinates])
+
+    def __hash__(self):
+        return self.letters.__hash__()
+
+    def __cmp__(self, other):
+        if self.letters > other.letters:
+            return 1
+        elif self.letters == other.letters:
+            return 0
+        else:
+            return - 1
+
+    def __eq__(self, other):
+        return self.letters == other.letters
 
     def __len__(self):
-        return len(self.letter_sequence)
+        return len(self.letters)
+        
+    def __str__(self):
+        return "{} : path : {}".format(self.letters, self.get_used_coord_numbers())
+    def __repr__(self):
+        return "{} : path : {}".format(self.letters, self.get_used_coord_numbers())
 
 class Dictionary:
     def __init__(self, dictionary_file):
@@ -87,6 +111,7 @@ class Dictionary:
         word_file = open(dictionary_file, "r")
 
         for word in word_file.readlines():
+            word = word.lower()
             self.words.add(word.strip())
             for index in xrange(len(word.strip()) + 1):
                 self.prefixes.add(word[:index])
@@ -97,7 +122,11 @@ class Dictionary:
     def contains_prefix(self, prefix):
         return prefix in self.prefixes
 
+
+
 if __name__ == "__main__":
-    boggleSolver = BoggleSolver(sys.argv[1:])
+    print sys.argv[1:-1]
+    print sys.argv[-1]
+    boggleSolver = BoggleSolver(sys.argv[1:-1], sys.argv[-1])
     words = boggleSolver.found_words 
     print words
