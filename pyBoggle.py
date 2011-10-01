@@ -60,24 +60,25 @@ class Board:
 class Word:
     def __init__(self):
         self.letters = ""
-        self.used_board_coordinates = set()
+        self.used_board_coordinates = []
 
     @classmethod
     def new(cls, row, column):
         word = cls()
-        word.used_board_coordinates.add((row, column))
+        word.used_board_coordinates.append((row, column))
         return word
 
     @classmethod
     def new_from_word(cls, word):
         new_word = cls()
         new_word.letters += word.letters
-        new_word.used_board_coordinates.update(word.used_board_coordinates)
+        new_word.used_board_coordinates.extend(word.used_board_coordinates)
         return new_word
 
     def add_letter(self, letter, row, column):
         self.letters += letter
-        self.used_board_coordinates.add((row, column))
+        if (row, column) not in self.used_board_coordinates:
+            self.used_board_coordinates.append((row, column))
 
     def get_used_coord_numbers(self):
         return map(lambda (x, y) : str(side_length * x + y), [coordinate for coordinate in self.used_board_coordinates])
@@ -100,10 +101,8 @@ class Word:
         return len(self.letters)
         
     def __str__(self):
-        return "{} : path : {}".format(self.letters, self.get_used_coord_numbers())
-    def __repr__(self):
-        return "{} : path : {}".format(self.letters, self.get_used_coord_numbers())
-
+        return "Word: {} Path: {}".format(self.letters, self.get_used_coord_numbers())
+    
 class Dictionary:
     def __init__(self, dictionary_file):
         self.words = set()
@@ -128,5 +127,8 @@ if __name__ == "__main__":
     print sys.argv[1:-1]
     print sys.argv[-1]
     boggleSolver = BoggleSolver(sys.argv[1:-1], sys.argv[-1])
-    words = boggleSolver.found_words 
-    print words
+    words = list(boggleSolver.found_words)
+    words.sort()
+    for word in words:
+        print word
+    
