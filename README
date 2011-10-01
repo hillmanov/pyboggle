@@ -1,0 +1,20 @@
+Boggle Solver written in Python
+
+Command line usage:
+
+pyBoggle.py <Space separated letters - must be square (4x4, 5x5 etc)> <Min word length>
+
+Example: 
+$>pyBoggle.py f r t w e d f r p o t r e d c v 4
+
+Output: 
+
+Word: code Path: ['14', '9', '5', '4']
+Word: coder Path: ['14', '9', '5', '4', '1']
+Word: coed Path: ['14', '9', '4', '5']
+Word: coft Path: ['14', '9', '6', '2']
+Word: cope Path: ['14', '9', '8', '4']
+Word: coper Path: ['14', '9', '8', '4', '1']
+Word: depot Path: ['5', '4', '8', '9', '10']
+
+If you wish to pass in "q", just put "qu" together in the list.
